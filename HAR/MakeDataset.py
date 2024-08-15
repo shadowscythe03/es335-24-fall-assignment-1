@@ -36,12 +36,12 @@ for folder in folders:
     for file in files:
 
         df = pd.read_csv(os.path.join(dataset_dir,folder,file),sep=",",header=0)
-        df = df[offset:offset+time*50]
+        df = df[offset:offset+time*50] #Starts at 100 and goes up to 599 (time*50 = 500, elements)
         X_train.append(df.values)
         y_train.append(classes[folder])
 
-X_train = np.array(X_train)
-y_train = np.array(y_train)
+X_train = np.array(X_train) #Shape(21x6, 500, 3)
+y_train = np.array(y_train) #Shape(21x6, 500, 3)
 
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
