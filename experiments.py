@@ -11,7 +11,11 @@ num_average_time = 100  # Number of times to run each experiment to calculate th
 
 # Function to create fake data (take inspiration from usage.py)
 # ...
-# Function to calculate average time (and std) taken by fit() and predict() for different N and P for 4 different cases of DTs
+def create_fakdata(N,M):
+    X = pd.DataFrame({i: pd.Series(np.random.randint(M, size=N), dtype="category") for i in range(5)})
+    y = pd.Series(np.random.randint(M, size=N), dtype="category")
+    return X, y
+# Function to calculate average time (and std) taken by fit() and predict() for different N and M for 4 different cases of DTs
 # ...
 # Function to plot the results
 # ...
