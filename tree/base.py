@@ -1,113 +1,11 @@
-#Metrics.py
-
-
-from typing import Union
-import pandas as pd
-
-def accuracy(y_hat: pd.Series, y: pd.Series) -> float:
-    assert y_hat.size == y.size
-    assert y_hat.size > 0   #corner cases
-
-    correct_predictions = (y_hat == y).sum()
-    return correct_predictions / y.size
-
-def precision(y_hat: pd.Series, y: pd.Series, cls: Union[int, str]) -> float:
-    assert y_hat.size == y.size
-    assert y_hat.size > 0
-
-    true_positives = ((y_hat == cls) & (y == cls)).sum()
-    predicted_positives = (y_hat == cls).sum()
-
-    if predicted_positives == 0:
-        return 0.0
-    return true_positives / predicted_positives #TP/(TP+FP)
-
-def recall(y_hat: pd.Series, y: pd.Series, cls: Union[int, str]) -> float:
-    assert y_hat.size == y.size
-    assert y_hat.size > 0
-
-    true_positives = ((y_hat == cls) & (y == cls)).sum()
-    actual_positives = (y == cls).sum()
-
-    if actual_positives == 0:
-        return 0.0
-    return true_positives / actual_positives    #TP/ (TP+FN)
-
-def rmse(y_hat: pd.Series, y: pd.Series) -> float:
-    assert y_hat.size == y.size
-    assert y_hat.size > 0
-
-    squared_errors = [(pred - actual) ** 2 for pred, actual in zip(y_hat, y)]
-    mse = sum(squared_errors) / len(squared_errors)
-    rmse = mse ** 0.5
-    return rmse
-
-def mae(y_hat: pd.Series, y: pd.Series) -> float:
-    assert y_hat.size == y.size
-    assert y_hat.size > 0
-
-    absolute_errors = [abs(pred - actual) for pred, actual in zip(y_hat, y)]
-    mae = sum(absolute_errors) / len(absolute_errors)
-    return mae
-
-
-#Utils.py
-
-import pandas as pd
-import numpy as np
-
-def one_hot_encoding(X: pd.DataFrame) -> pd.DataFrame:
-    return pd.get_dummies(X)
-
-def check_ifreal(y: pd.Series) -> bool:
-    return pd.api.types.is_numeric_dtype(y)
-
-def entropy(y: pd.Series) -> float:
-    probs = y.value_counts(normalize=True)
-    return -np.sum(probs * np.log2(probs))
-
-def gini_index(y: pd.Series) -> float:
-    probs = y.value_counts(normalize=True)
-    return 1 - np.sum(probs ** 2)
-
-def information_gain(X: pd.DataFrame, y: pd.Series, attribute: str, criterion: str) -> float:
-    if criterion == "entropy":
-        criterion_func = entropy
-    elif criterion == "gini_index":
-        criterion_func = gini_index
-
-    total_entropy = criterion_func(y)
-    values, counts = np.unique(X[attribute], return_counts=True)
-    weighted_entropy = np.sum([(counts[i] / np.sum(counts)) * criterion_func(y[X[attribute] == values[i]]) for i in range(len(values))])
-
-    return total_entropy - weighted_entropy
-
-def opt_split_attribute(X: pd.DataFrame, y: pd.Series, criterion: str, attributes: pd.Index) -> str:
-    best_attr = None
-    best_gain = -1
-
-    for attr in attributes:
-        gain = information_gain(X, y, attr, criterion)
-        if gain > best_gain:
-            best_gain = gain
-            best_attr = attr
-
-    return best_attr
-
-def split_data(X: pd.DataFrame, y: pd.Series, attribute: str, value: float):
-    left_mask = X[attribute] <= value
-    right_mask = ~left_mask
-
-    return X[left_mask], y[left_mask], X[right_mask], y[right_mask]
-
-#base.py
+##base.py
 
 from dataclasses import dataclass
 from typing import Literal
 import pandas as pd
 import numpy as np
-# from tree.utils import *
-# from metrics import *
+from tree.utils import *
+
 
 @dataclass
 class TreeNode:
