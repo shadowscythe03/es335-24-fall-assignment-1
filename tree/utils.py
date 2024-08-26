@@ -32,17 +32,17 @@ def information_gain(X: pd.DataFrame, y: pd.Series, attribute: str, criterion: s
 def opt_split_attribute(X: pd.DataFrame, y: pd.Series, criterion: str, attributes: pd.Index) -> str:
     best_attr = None
     best_gain = -1
-    
+
     for attr in attributes:
         gain = information_gain(X, y, attr, criterion)
         if gain > best_gain:
             best_gain = gain
             best_attr = attr
-    
+
     return best_attr
 
 def split_data(X: pd.DataFrame, y: pd.Series, attribute: str, value: float):
     left_mask = X[attribute] <= value
     right_mask = ~left_mask
-    
+
     return X[left_mask], y[left_mask], X[right_mask], y[right_mask]

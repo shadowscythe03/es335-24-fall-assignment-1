@@ -1,3 +1,4 @@
+#Metrics.py
 
 from typing import Union
 import pandas as pd
@@ -34,7 +35,7 @@ def recall(y_hat: pd.Series, y: pd.Series, cls: Union[int, str]) -> float:
 def rmse(y_hat: pd.Series, y: pd.Series) -> float:
     assert y_hat.size == y.size
     assert y_hat.size > 0
-    
+
     squared_errors = [(pred - actual) ** 2 for pred, actual in zip(y_hat, y)]
     mse = sum(squared_errors) / len(squared_errors)
     rmse = mse ** 0.5
@@ -43,11 +44,7 @@ def rmse(y_hat: pd.Series, y: pd.Series) -> float:
 def mae(y_hat: pd.Series, y: pd.Series) -> float:
     assert y_hat.size == y.size
     assert y_hat.size > 0
-    
+
     absolute_errors = [abs(pred - actual) for pred, actual in zip(y_hat, y)]
     mae = sum(absolute_errors) / len(absolute_errors)
     return mae
-
-
-
-
