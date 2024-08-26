@@ -11,7 +11,7 @@ def check_ifreal(y: pd.Series) -> bool:
 
 def entropy(y: pd.Series) -> float:
     probs = y.value_counts(normalize=True)
-    return -np.sum(probs * np.log2(probs+1e-5))
+    return -np.sum(probs * np.log2(probs+1e-10))
 
 def gini_index(y: pd.Series) -> float:
     probs = y.value_counts(normalize=True)
