@@ -14,7 +14,7 @@ def accuracy(y_hat: pd.Series, y: pd.Series) -> float:
     ensure that the function does not fail in corner cases.
     """
     assert y_hat.size == y.size
-    assert y>0
+    assert y.size>0
     
     tp_tn = (y_hat == y).sum()
     return tp_tn/y.size
