@@ -1,177 +1,113 @@
-"""
-The current code given is for the Assignment 1.
-You will be expected to use this to make trees for:
-> discrete input, discrete output
-> real input, real output
-> real input, discrete output
-> discrete input, real output
-"""
+# base.py
+
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Union
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from tree.utils import *
 
 np.random.seed(42)
 
+class TreeNode:
+    def __init__(self, feature=None, threshold=None, left=None, right=None, value=None):
+        self.feature = feature
+        self.threshold = threshold
+        self.left = left
+        self.right = right
+        self.value = value
 
 @dataclass
 class DecisionTree:
-    criterion: Literal["information_gain", "gini_index"]  # criterion won't be used for regression
-    max_depth: int  # The maximum depth the tree can grow to
+    criterion: Literal["information_gain", "gini_index", "mse"]
+    max_depth: int = 5
 
-    def __init__(self, criterion, max_depth=5):
+    def __init__(self, criterion: str, max_depth: int = 5):
         self.criterion = criterion
         self.max_depth = max_depth
+        self.root = None
+        self.is_classification = criterion in ["information_gain", "gini_index"]
 
     def fit(self, X: pd.DataFrame, y: pd.Series) -> None:
         """
-        Function to train and construct the decision tree
+        Function to train and construct the decision tree.
         """
+        self.root = self._build_tree(X, y, depth=0)
 
-        # If you wish your code can have cases for different types of input and output data (discrete, real)
-        # Use the functions from utils.py to find the optimal attribute to split upon and then construct the tree accordingly.
-        # You may(according to your implemetation) need to call functions recursively to construct the tree. 
+    def _build_tree(self, X: pd.DataFrame, y: pd.Series, depth: int) -> TreeNode:
+        num_samples, num_features = X.shape
 
-        pass
+        # Terminate the recursion if the tree is deep enough or there's only one class left
+        if depth >= self.max_depth or num_samples <= 1 or len(y.unique()) == 1:
+            leaf_value = self._calculate_leaf_value(y)
+            return TreeNode(value=leaf_value)
+
+        features = X.columns
+        best_feature, best_split_value = opt_split_attribute(X, y, self.criterion, features)
+
+        if best_feature is None:
+            leaf_value = self._calculate_leaf_value(y)
+            return TreeNode(value=leaf_value)
+
+        left_data, right_data = split_data(X, y, best_feature, best_split_value)
+
+        # If either split is empty, use the parent node's value as the leaf value
+        if len(left_data["y"]) == 0 or len(right_data["y"]) == 0:
+            leaf_value = self._calculate_leaf_value(y)
+            return TreeNode(value=leaf_value)
+
+        left_child = self._build_tree(left_data["X"], left_data["y"], depth + 1)
+        right_child = self._build_tree(right_data["X"], right_data["y"], depth + 1)
+        return TreeNode(feature=best_feature, threshold=best_split_value, left=left_child, right=right_child)
+
+    def _calculate_leaf_value(self, y: pd.Series) -> Union[float, int]:
+        """
+        Calculate the leaf value based on the output type.
+        For regression (continuous output), return the mean.
+        For classification (discrete output), return the mode, or the first element of the mode.
+        """
+        if y.empty:  # If the series is empty, return None or handle accordingly
+            return None
+        if self.is_classification:
+            mode = y.mode()
+            if mode.empty:
+                return y.iloc[0]  # Fallback to the first element if mode is empty
+            else:
+                return mode.iloc[0]
+        else:
+            return y.mean()
 
     def predict(self, X: pd.DataFrame) -> pd.Series:
         """
-        Funtion to run the decision tree on test inputs
+        Function to run the decision tree on test inputs.
         """
+        return X.apply(self._predict_single, axis=1)
 
-        # Traverse the tree you constructed to return the predicted values for the given test inputs.
-
-        pass
+    def _predict_single(self, x: pd.Series) -> Union[float, int]:
+        node = self.root
+        while node.left or node.right:
+            if node.left is None or node.right is None:
+                return node.value
+            if x[node.feature] <= node.threshold:
+                node = node.left
+            else:
+                node = node.right
+        return node.value
 
     def plot(self) -> None:
         """
-        Function to plot the tree
-
-        Output Example:
-        ?(X1 > 4)
-            Y: ?(X2 > 7)
-                Y: Class A
-                N: Class B
-            N: Class C
-        Where Y => Yes and N => No
+        Function to plot the tree.
         """
-        pass
+        self._plot_tree(self.root, indent="")
 
-# ##base.py
-
-# from dataclasses import dataclass
-# from typing import Literal
-# import pandas as pd
-# import numpy as np
-# from tree.utils import *
-
-
-# @dataclass
-# class TreeNode:
-#     attribute: str = None
-#     value: float = None
-#     left: 'TreeNode' = None
-#     right: 'TreeNode' = None
-#     output: str = None
-
-# @dataclass
-# class DecisionTree:
-#     criterion: Literal["information_gain", "gini_index", "mse"]
-#     max_depth: int = 5
-
-#     def __init__(self, criterion: Literal["information_gain", "gini_index", "mse"], max_depth=5):
-#         self.criterion = criterion
-#         self.max_depth = max_depth
-#         self.tree = None
-
-#     def fit(self, X: pd.DataFrame, y: pd.Series, depth=0) -> TreeNode:
-#         # Stop if all labels are the same
-#         if len(y.unique()) == 1:
-#             return TreeNode(output=y.iloc[0])
-
-#         # Stop if we reach the maximum depth
-#         if depth >= self.max_depth:
-#             # Return the most frequent class for discrete output or the mean for real output
-#             return TreeNode(output=y.mean() if y.dtype.kind in 'fc' else y.mode()[0])
-
-#         # Apply one-hot encoding for discrete features
-#         X_encoded = one_hot_encoding(X)
-
-#         # Handle real output using MSE
-#         if self.criterion == "mse" and check_ifreal(y):
-#             best_attr, best_value = self._find_best_split_mse(X_encoded, y)
-#             if best_attr is None:
-#                 return TreeNode(output=y.mean())  # No split found, return mean as output
-
-#             X_left, y_left, X_right, y_right = split_data(X_encoded, y, best_attr, best_value)
-#             left_subtree = self.fit(X_left, y_left, depth + 1)
-#             right_subtree = self.fit(X_right, y_right, depth + 1)
-#             return TreeNode(attribute=best_attr, value=best_value, left=left_subtree, right=right_subtree)
-
-#         # Handle discrete output using information gain (entropy or gini index)
-#         elif self.criterion in ["information_gain", "gini_index"]:
-#             best_attr = opt_split_attribute(X_encoded, y, self.criterion, X_encoded.columns)
-#             if best_attr is None:
-#                 return TreeNode(output=y.mode()[0])
-
-#             value = X_encoded[best_attr].mean() if check_ifreal(X_encoded[best_attr]) else X_encoded[best_attr].mode()[0]
-#             X_left, y_left, X_right, y_right = split_data(X_encoded, y, best_attr, value)
-#             left_subtree = self.fit(X_left, y_left, depth + 1)
-#             right_subtree = self.fit(X_right, y_right, depth + 1)
-#             return TreeNode(attribute=best_attr, value=value, left=left_subtree, right=right_subtree)
-
-#         else:
-#             raise ValueError(f"Unsupported criterion: {self.criterion}")
-
-#     # Other methods (like predict, _find_best_split_mse, plot_node, etc.) remain the same
-
-
-#     def _find_best_split_mse(self, X: pd.DataFrame, y: pd.Series):
-#         best_attr = None
-#         best_value = None
-#         best_mse = float('inf')
-
-#         for attr in X.columns:
-#             # For each attribute, find the best split by calculating MSE
-#             unique_values = np.sort(X[attr].unique())
-#             for value in unique_values:
-#                 X_left, y_left, X_right, y_right = split_data(X, y, attr, value)
-#                 if len(y_left) == 0 or len(y_right) == 0:
-#                     continue
-
-#                 mse_left = np.mean((y_left - y_left.mean()) ** 2)
-#                 mse_right = np.mean((y_right - y_right.mean()) ** 2)
-#                 mse_split = (len(y_left) * mse_left + len(y_right) * mse_right) / len(y)
-
-#                 if mse_split < best_mse:
-#                     best_mse = mse_split
-#                     best_attr = attr
-#                     best_value = value
-
-#         return best_attr, best_value
-
-#     def predict_row(self, row: pd.Series, node: TreeNode):
-#         if node.output is not None:
-#             return node.output
-#         if row[node.attribute] <= node.value:
-#             return self.predict_row(row, node.left)
-#         else:
-#             return self.predict_row(row, node.right)
-
-#     def predict(self, X: pd.DataFrame) -> pd.Series:
-#         return X.apply(lambda row: self.predict_row(row, self.tree), axis=1)
-
-#     def plot_node(self, node: TreeNode, depth=0) -> None:
-#         if node.output is not None:
-#             print(f"{'    ' * depth}Output: {node.output}")
-#             return
-#         print(f"{'    ' * depth}If {node.attribute} <= {node.value}:")
-#         self.plot_node(node.left, depth + 1)
-#         print(f"{'    ' * depth}Else:")
-#         self.plot_node(node.right, depth + 1)
-
-#     def plot(self) -> None:
-#         self.plot_node(self.tree)
+    def _plot_tree(self, node: TreeNode, indent: str):
+        if node is None:
+            return
+        if node.value is not None:
+            print(f"{indent}Predict: {node.value}")
+        else:
+            print(f"{indent}?(X[{node.feature}] <= {node.threshold})")
+            print(f"{indent}├─ Yes:")
+            self._plot_tree(node.left, indent + "│   ")
+            print(f"{indent}└─ No:")
+            self._plot_tree(node.right, indent + "    ")
