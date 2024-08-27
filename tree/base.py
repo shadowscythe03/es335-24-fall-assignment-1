@@ -6,6 +6,7 @@ from typing import Literal, Union
 import numpy as np
 import pandas as pd
 from tree.utils import *
+# from graphviz import Digraph
 
 np.random.seed(42)
 
@@ -26,7 +27,7 @@ class DecisionTree:
         self.criterion = criterion
         self.max_depth = max_depth
         self.root = None
-        self.is_classification = criterion in ["information_gain", "gini_index"]
+        self.is_classification = criterion #in ["information_gain", "gini_index"]
 
     def fit(self, X: pd.DataFrame, y: pd.Series) -> None:
         """
