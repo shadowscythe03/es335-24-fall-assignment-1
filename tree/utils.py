@@ -50,10 +50,11 @@ def information_gain(Y: pd.Series, attr: pd.Series, criterion: str) -> float:
         total_impurity = entropy(Y)
     elif criterion == 'gini':
         total_impurity = gini_index(Y)
-    elif criterion == 'mse':
-        total_impurity = mse(Y)
+    # elif criterion == 'mse':
     else:
-        raise ValueError("Criterion should be 'entropy', 'gini', or 'mse'")
+        total_impurity = mse(Y)
+    # else:
+    #     raise ValueError("Criterion should be 'entropy', 'gini', or 'mse'")
     
     # Calculate the weighted impurity after splitting on the attribute
     weighted_impurity = 0.0
