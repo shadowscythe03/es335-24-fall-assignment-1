@@ -48,7 +48,7 @@ def information_gain(Y: pd.Series, attr: pd.Series, criterion: str) -> float:
     # Calculate the impurity of the original dataset
     if criterion == 'information_gain':
         total_impurity = entropy(Y)
-    elif criterion == 'gini':
+    elif criterion == 'gini_index':
         total_impurity = gini_index(Y)
     # elif criterion == 'mse':
     else:
@@ -63,13 +63,13 @@ def information_gain(Y: pd.Series, attr: pd.Series, criterion: str) -> float:
         weight = len(subset_Y) / len(Y)
         
         if criterion == 'information_gain':
-            sub_impurity = entropy(subset_Y)
-        elif criterion == 'gini':
-            sub_impurity = gini_index(subset_Y)
-        elif criterion == 'mse':
-            sub_impurity = mse(subset_Y)
+            subset_impurity = entropy(subset_Y)
+        elif criterion == 'gini_index':
+            subset_impurity = gini_index(subset_Y)
+        else:
+            subset_impurity = mse(subset_Y)
         
-        weighted_impurity += weight * sub_impurity
+        weighted_impurity += weight * subset_impurity
     
     # Information gain is the difference between the total impurity and the weighted impurity
     return total_impurity - weighted_impurity
