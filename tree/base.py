@@ -6,7 +6,7 @@ from typing import Literal, Union
 import numpy as np
 import pandas as pd
 from tree.utils import *
-from graphviz import Digraph
+# from graphviz import Digraph
 
 np.random.seed(42)
 
@@ -23,12 +23,11 @@ class DecisionTree:
     criterion: Literal["information_gain", "gini_index", "mse"]
     max_depth: int = 5
 
-    def __init__(self, criterion: str, max_depth: int = 5, mode = 'text'):
+    def __init__(self, criterion: str, max_depth: int = 5):
         self.criterion = criterion
         self.max_depth = max_depth
         self.root = None
         self.is_classification = criterion #in ["information_gain", "gini_index"]
-        self.mode = mode
 
     def fit(self, X: pd.DataFrame, y: pd.Series) -> None:
         """
@@ -96,16 +95,11 @@ class DecisionTree:
                 node = node.right
         return node.value
 
-    def plot(self,mode = 'text', criterion = None) -> None:
+    def plot(self) -> None:
         """
         Function to plot the tree.
         """
-        if mode == 'text':
-            self._plot_tree(self.root, indent="")
-        elif mode == "img":
-            dot = Digraph()
-            self._add_nodes_edges(dot, self.root)
-            dot.render(f'tree_{criterion}', format='png', cleanup=True)
+        self._plot_tree(self.root, indent="")
 
     def _plot_tree(self, node: TreeNode, indent: str):
         if node is None:
@@ -118,22 +112,3 @@ class DecisionTree:
             self._plot_tree(node.left, indent + "│   ")
             print(f"{indent}└─ No:")
             self._plot_tree(node.right, indent + "    ")
-
-    def _add_nodes_edges(self, dot, node, counter=[0], parent=None, edge_label=""):
-        node_id = str(counter[0])
-        counter[0] += 1
-
-        if node.value is not None:
-            label = f"Value: {node.value}"
-        else:
-            label = f"X[{node.feature}] <= {node.threshold}"
-
-        dot.node(node_id, label=label)
-
-        if parent is not None:
-            dot.edge(parent, node_id, label=edge_label)
-
-        if node.left is not None:
-            self._add_nodes_edges(dot, node.left, counter, node_id, "Yes")
-        if node.right is not None:
-            self._add_nodes_edges(dot, node.right, counter, node_id, "No")
