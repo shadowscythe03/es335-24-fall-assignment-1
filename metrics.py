@@ -14,37 +14,53 @@ def accuracy(y_hat: pd.Series, y: pd.Series) -> float:
     ensure that the function does not fail in corner cases.
     """
     assert y_hat.size == y.size
-    # TODO: Write here
-    pass
+    assert y>0
+    
+    tp_tn = (y_hat == y).sum()
+    return tp_tn/y.size
 
 
 def precision(y_hat: pd.Series, y: pd.Series, cls: Union[int, str]) -> float:
     """
     Function to calculate the precision
     """
-    pass
+    tp = ((y_hat == cls) & (y == cls)).sum()
+    tp_fp = (y_hat == cls).sum()
+    if tp_fp == 0:  #to prevent zero division
+        return 0
+    return tp/tp_fp
 
 
 def recall(y_hat: pd.Series, y: pd.Series, cls: Union[int, str]) -> float:
     """
     Function to calculate the recall
     """
-    pass
+    tp = ((y_hat == cls) & (y == cls)).sum()
+    tp_fn = (y == cls).sum()
+    if tp_fn == 0:#to prevent zero division
+        return 0
+    return tp/tp_fn
 
 
 def rmse(y_hat: pd.Series, y: pd.Series) -> float:
     """
     Function to calculate the root-mean-squared-error(rmse)
     """
-
-    pass
+    # e = y_hat-y
+    # se = e**2
+    # mse = se.mean()
+    rmse = (((y_hat-y)**2).mean())**0.5
+    return rmse
 
 
 def mae(y_hat: pd.Series, y: pd.Series) -> float:
     """
     Function to calculate the mean-absolute-error(mae)
     """
-    pass
+    mae = ((y_hat-y).abs()).mean()
+    return mae
+    
+
 
 # #Metrics.py
 
