@@ -1,0 +1,16 @@
+Accuracy: 0.9
+Precision (Class 0): 0.9090909090909091
+Precision (Class 1): 0.8947368421052632
+Recall (Class 0): 0.8333333333333334
+Recall (Class 1): 0.9444444444444444
+Depth 1: Avg Accuracy 0.9
+Depth 2: Avg Accuracy 0.9200000000000002
+Depth 3: Avg Accuracy 0.9000000000000001
+Depth 4: Avg Accuracy 0.89
+Depth 5: Avg Accuracy 0.8800000000000001
+Depth 6: Avg Accuracy 0.85
+Depth 7: Avg Accuracy 0.8400000000000001
+Depth 8: Avg Accuracy 0.85
+Depth 9: Avg Accuracy 0.8400000000000001
+Depth 10: Avg Accuracy 0.8400000000000001
+Best Depth: 2 with Accuracy: 0.9200000000000002
