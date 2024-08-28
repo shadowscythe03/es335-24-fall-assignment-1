@@ -5,7 +5,7 @@ from typing import Literal, Union
 
 import numpy as np
 import pandas as pd
-from tree.utils import *
+from utils import *
 # from graphviz import Digraph
 
 np.random.seed(42)
