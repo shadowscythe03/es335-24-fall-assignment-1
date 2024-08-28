@@ -18,7 +18,6 @@ def check_ifreal(y: pd.Series) -> bool:
     Function to check if the given series has real or discrete values
     """
     return pd.api.types.is_numeric_dtype(y)
-    pass
 
 
 def entropy(Y: pd.Series) -> float:
@@ -53,8 +52,6 @@ def information_gain(Y: pd.Series, attr: pd.Series, criterion: str) -> float:
     # elif criterion == 'mse':
     else:
         total_impurity = mse(Y)
-    # else:
-    #     raise ValueError("Criterion should be 'entropy', 'gini', or 'mse'")
     
     # Calculate the weighted impurity after splitting on the attribute
     weighted_impurity = 0.0
